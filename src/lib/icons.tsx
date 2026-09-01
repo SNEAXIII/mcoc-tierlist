@@ -5,6 +5,7 @@ import {
   ExclamationTriangleIcon,
   FireIcon,
   FlagIcon,
+  LockClosedIcon,
   MapIcon,
   ShieldCheckIcon,
   ShieldExclamationIcon,
@@ -18,7 +19,6 @@ import {
   CrossedSwordsIcon,
   FlameIcon,
   GemIcon,
-  MedalIcon,
   ShieldIcon,
   SwordIcon,
   SwordShieldIcon,
@@ -47,6 +47,8 @@ export interface AttributeDefinition {
   variants: IconVariant[]
   /** Only `awk` carries a numeric value (the signature level). */
   hasValue?: boolean
+  /** Render the code as text on the badge instead of an icon (for `6★`). */
+  textBadge?: boolean
 }
 
 /**
@@ -55,6 +57,19 @@ export interface AttributeDefinition {
  * what keeps them from drifting apart.
  */
 export const ATTRIBUTES: Record<AttributeKey, AttributeDefinition> = {
+  six: {
+    key: 'six',
+    code: '6★',
+    // Text badge: a star glyph would read as the ASC medal, and this marker has
+    // to be unmistakable — it decides which frame the portrait is drawn in.
+    textBadge: true,
+    chip: 'bg-slate-200 text-black ring-slate-400/60',
+    accent: 'data-[on=true]:bg-slate-200 data-[on=true]:text-black data-[on=true]:border-slate-300',
+    variants: [
+      { id: 'star', label: 'Star (Heroicons)', Icon: StarIcon },
+      { id: 'lock', label: 'Lock (Heroicons)', Icon: LockClosedIcon },
+    ],
+  },
   atk: {
     key: 'atk',
     code: 'ATK',
@@ -120,19 +135,6 @@ export const ATTRIBUTES: Record<AttributeKey, AttributeDefinition> = {
       { id: 'flag', label: 'Flag (Heroicons)', Icon: FlagIcon },
       { id: 'map', label: 'Map (Heroicons)', Icon: MapIcon },
       { id: 'grid', label: 'Grid (Heroicons)', Icon: Squares2X2Icon },
-    ],
-  },
-  asc: {
-    key: 'asc',
-    code: 'ASC',
-    chip: 'bg-yellow-400 text-black ring-yellow-200/70',
-    accent:
-      'data-[on=true]:bg-yellow-400 data-[on=true]:text-black data-[on=true]:border-yellow-300',
-    variants: [
-      { id: 'medal', label: 'Medal', Icon: MedalIcon },
-      { id: 'trophy', label: 'Trophy (Heroicons)', Icon: TrophyIcon },
-      { id: 'star', label: 'Star (Heroicons)', Icon: StarIcon },
-      { id: 'chevrons', label: 'Chevrons (Heroicons)', Icon: ChevronDoubleUpIcon },
     ],
   },
   awk: {

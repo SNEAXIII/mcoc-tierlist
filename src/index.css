@@ -1,7 +1,6 @@
 @import 'tailwindcss';
 
-/* Dark-only, self-contained theme. Token names mirror the main Mawster app
-   (shadcn/ui semantics) so components read the same in both codebases. */
+/* Dark-only, self-contained theme. Token names follow shadcn/ui semantics. */
 @theme {
   --color-background: #0a0e15;
   --color-foreground: #e8edf5;

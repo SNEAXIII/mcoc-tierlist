@@ -56,7 +56,6 @@ export default function ChampionPool({
               attributes={attributesOf(board, champion.id)}
               iconChoices={board.iconChoices}
               size={cardSize}
-              frame={board.frame}
               showName={showNames}
               showBadges={showBadges}
               onOpen={onOpenChampion}

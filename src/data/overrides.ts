@@ -1,7 +1,7 @@
 /**
  * Hand-maintained corrections applied on top of `champions.json`.
  *
- * `champions.json` is generated from the Mawster API fixture, which only knows
+ * `champions.json` is generated from a roster export, which only knows
  * a champion's name, class, portrait, alias and its ascension / prefight flags.
  * Everything the tier list needs beyond that lives here, keyed by champion id
  * (the slug of the name — see `scripts/build-champions.mjs`).

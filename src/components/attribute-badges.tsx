@@ -39,7 +39,11 @@ export default function AttributeBadges({
             )}
             style={{ height: size, minWidth: size, fontSize: size * 0.62 }}
           >
-            <Icon style={{ width: size * 0.7, height: size * 0.7 }} />
+            {def.textBadge ? (
+              <span className='px-[1px]'>{def.code}</span>
+            ) : (
+              <Icon style={{ width: size * 0.7, height: size * 0.7 }} />
+            )}
             {value && <span className='pr-[1px]'>{value}</span>}
           </span>
         )

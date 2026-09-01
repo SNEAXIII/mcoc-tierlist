@@ -8,7 +8,7 @@ export interface Champion {
   id: string
   name: string
   championClass: ChampionClass
-  /** Path on the Mawster static server, e.g. `/static/champions/groot.png`. */
+  /** Path on the artwork host, e.g. `/static/champions/groot.png`. */
   imageUrl: string
   /** Space-separated short names players type when searching ("abo immo"). */
   alias: string
@@ -18,7 +18,7 @@ export interface Champion {
 }
 
 /** Per-champion tags the user sets; each one is also a filter and a card badge. */
-export const ATTRIBUTE_KEYS = ['atk', 'def', 'dual', 'ga', 'bg', 'asc', 'awk'] as const
+export const ATTRIBUTE_KEYS = ['six', 'atk', 'def', 'dual', 'ga', 'bg', 'awk'] as const
 export type AttributeKey = (typeof ATTRIBUTE_KEYS)[number]
 
 export interface ChampionAttributes {
@@ -44,8 +44,6 @@ export interface BoardState {
   attributes: Record<string, ChampionAttributes>
   /** Chosen icon variant per attribute — see `lib/icons.tsx`. */
   iconChoices: Partial<Record<AttributeKey, string>>
-  /** Star frame drawn behind every portrait; `none` renders the bare artwork. */
-  frame: FrameOption
   title: string
 }
 

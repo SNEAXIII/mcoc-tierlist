@@ -1,6 +1,6 @@
 import type { FrameOption } from './types'
 
-/** Portraits and star frames are served by the Mawster static host, not by Pages. */
+/** Portraits and star frames come from the artwork host, not from Pages. */
 export const STATIC_ORIGIN = 'https://www.mawster.app'
 
 /** Pre-resized champion thumbnails that exist on the static server. */
@@ -40,7 +40,7 @@ export const FRAME_ASPECT = 212 / 174
 
 /**
  * Where the champion artwork sits inside a frame, as fractions of the frame's
- * own width/height — copied from the Mawster app so the fit is identical.
+ * own width/height, matching how the game lays the artwork into the frame.
  *
  * `left`/`width` keep the frame's side pillars visible; `top` sits above the
  * frame's top bar so the artwork runs over it like in game, and `height` stops

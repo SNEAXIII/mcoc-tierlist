@@ -1,5 +1,5 @@
 export const en = {
-  appTitle: 'Mawster Tier List',
+  appTitle: 'MCOC Tier List',
   boardTitlePlaceholder: 'Untitled tier list',
   search: 'Search a champion…',
   filters: 'Filters',
@@ -62,8 +62,7 @@ export const en = {
   removeFromBoard: 'Back to pool',
   about: 'About',
   aboutBanned: (n: number) => `${n} non-playable champions are hidden.`,
-  aboutData:
-    'Champion data and artwork come from mawster.app. Everything is stored in your browser.',
+  aboutData: 'Everything you build is stored in your browser — nothing is uploaded.',
   language: 'Language',
   dragHint: 'Drag a champion onto a tier, or tap it to pick one.',
 }
@@ -71,7 +70,7 @@ export const en = {
 export type Dictionary = typeof en
 
 export const fr: Dictionary = {
-  appTitle: 'Mawster Tier List',
+  appTitle: 'MCOC Tier List',
   boardTitlePlaceholder: 'Tier list sans titre',
   search: 'Rechercher un champion…',
   filters: 'Filtres',
@@ -134,8 +133,7 @@ export const fr: Dictionary = {
   removeFromBoard: 'Retour au pool',
   about: 'À propos',
   aboutBanned: (n: number) => `${n} champions non jouables sont masqués.`,
-  aboutData:
-    'Les données et visuels des champions viennent de mawster.app. Tout est stocké dans votre navigateur.',
+  aboutData: 'Tout ce que vous construisez est stocké dans votre navigateur — rien n’est envoyé.',
   language: 'Langue',
   dragHint: 'Glissez un champion sur un tier, ou touchez-le pour en choisir un.',
 }

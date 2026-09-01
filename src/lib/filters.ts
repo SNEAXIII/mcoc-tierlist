@@ -1,5 +1,5 @@
 import type { AttributeKey, BoardState, Champion, ChampionClass } from './types'
-import { attributesOf } from './board'
+import { attributesOf, isSixStarLocked } from './board'
 
 export interface FilterState {
   query: string
@@ -48,7 +48,7 @@ export function matchesFilters(
 ): boolean {
   if (filters.classes.length > 0 && !filters.classes.includes(champion.championClass)) return false
   if (filters.ascendable && !champion.isAscendable) return false
-  if (filters.sevenStar && !champion.isSevenStar) return false
+  if (filters.sevenStar && isSixStarLocked(champion, attributesOf(board, champion.id))) return false
   if (filters.prefight && !champion.hasPrefight) return false
 
   if (filters.attributes.length > 0) {

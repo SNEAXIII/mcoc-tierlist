@@ -91,7 +91,6 @@ export default function TierRow({
                 attributes={attributesOf(board, id)}
                 iconChoices={board.iconChoices}
                 size={cardSize}
-                frame={board.frame}
                 showName={showNames}
                 showBadges={showBadges}
                 exporting={exporting}

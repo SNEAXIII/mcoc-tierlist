@@ -2,14 +2,14 @@ import Modal from './modal'
 import ToggleChip from './toggle-chip'
 import ChampionPortrait from './champion-portrait'
 import { ATTRIBUTE_LIST, attributeIcon } from '@/lib/icons'
-import { attributesOf } from '@/lib/board'
+import { attributesOf, frameFor } from '@/lib/board'
 import { readableTextColor } from '@/lib/color'
 import type { BoardActions } from '@/lib/use-board'
 import { POOL_ID } from '@/lib/use-board'
 import type { BoardState, Champion } from '@/lib/types'
 import type { Dictionary } from '@/i18n/locales'
 
-/** Common signature levels, mirroring the presets used by the Mawster roster. */
+/** Common signature levels players actually stop at. */
 const SIG_PRESETS = [20, 60, 100, 200]
 
 interface ChampionSheetProps {
@@ -49,7 +49,7 @@ export default function ChampionSheet({
           <ChampionPortrait
             champion={champion}
             size={96}
-            frame={board.frame}
+            frame={frameFor(champion, attrs)}
           />
           <div className='flex flex-col gap-1 text-xs text-muted-foreground'>
             <span className='text-sm font-semibold text-foreground'>{champion.name}</span>

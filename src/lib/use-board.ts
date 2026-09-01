@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TIER_PALETTE, attributesOf, defaultBoard, loadBoard, newTierId, saveBoard } from './board'
-import type { AttributeKey, BoardState, FrameOption, Tier } from './types'
+import type { AttributeKey, BoardState, Tier } from './types'
 
 /** Pool acts as a droppable container like any tier; this is its container id. */
 export const POOL_ID = 'pool'
@@ -140,7 +140,6 @@ export function useBoard() {
     setBoard((b) => ({ ...b, iconChoices: { ...b.iconChoices, [key]: variantId } }))
   }, [])
 
-  const setFrame = useCallback((frame: FrameOption) => setBoard((b) => ({ ...b, frame })), [])
   const setTitle = useCallback((title: string) => setBoard((b) => ({ ...b, title })), [])
   const replaceBoard = useCallback((next: BoardState) => setBoard(next), [])
   const resetBoard = useCallback(() => setBoard(defaultBoard()), [])
@@ -157,7 +156,6 @@ export function useBoard() {
       setSignature,
       clearAttributes,
       setIconChoice,
-      setFrame,
       setTitle,
       replaceBoard,
       resetBoard,
@@ -173,7 +171,6 @@ export function useBoard() {
       setSignature,
       clearAttributes,
       setIconChoice,
-      setFrame,
       setTitle,
       replaceBoard,
       resetBoard,

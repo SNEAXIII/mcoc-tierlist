@@ -5,14 +5,14 @@ import ChampionPortrait from './champion-portrait'
 import AttributeBadges from './attribute-badges'
 import { cn } from '@/lib/cn'
 import { FRAME_ASPECT } from '@/lib/assets'
-import type { AttributeKey, Champion, ChampionAttributes, FrameOption } from '@/lib/types'
+import { frameFor } from '@/lib/board'
+import type { AttributeKey, Champion, ChampionAttributes } from '@/lib/types'
 
 export interface ChampionCardProps {
   champion: Champion
   attributes: ChampionAttributes
   iconChoices: Partial<Record<AttributeKey, string>>
   size: number
-  frame: FrameOption
   showName: boolean
   showBadges: boolean
   exporting?: boolean
@@ -25,11 +25,13 @@ export function ChampionCardVisual({
   attributes,
   iconChoices,
   size,
-  frame,
   showName,
   showBadges,
   exporting = false,
 }: Readonly<Omit<ChampionCardProps, 'onOpen'>>) {
+  // Rarity decides the frame — there is no display toggle to override it.
+  const frame = frameFor(champion, attributes)
+
   return (
     <div
       className='flex flex-col items-center'

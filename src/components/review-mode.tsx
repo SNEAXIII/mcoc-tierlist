@@ -8,7 +8,7 @@ import {
 import ChampionPortrait from './champion-portrait'
 import ToggleChip from './toggle-chip'
 import { CHAMPIONS_BY_ID } from '@/data/champions'
-import { attributesOf } from '@/lib/board'
+import { attributesOf, frameFor } from '@/lib/board'
 import { readableTextColor } from '@/lib/color'
 import { ATTRIBUTE_LIST, attributeIcon } from '@/lib/icons'
 import { cn } from '@/lib/cn'
@@ -152,7 +152,7 @@ export default function ReviewMode({
             <ChampionPortrait
               champion={champion}
               size={200}
-              frame={board.frame}
+              frame={frameFor(champion, attrs)}
             />
             <div className='text-center'>
               <h2 className='text-xl font-black leading-tight'>{champion.name}</h2>

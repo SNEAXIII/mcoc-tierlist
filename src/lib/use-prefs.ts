@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { readStored, writeStored } from './storage'
 
-const STORAGE_KEY = 'mawster-tierlist:prefs'
+const STORAGE_NAME = 'prefs'
 
 export interface DisplayPrefs {
   cardSize: number
@@ -21,21 +22,17 @@ export function usePrefs(): [DisplayPrefs, (patch: Partial<DisplayPrefs>) => voi
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
+      const raw = readStored(STORAGE_NAME)
       if (raw) setPrefs({ ...DEFAULTS, ...(JSON.parse(raw) as Partial<DisplayPrefs>) })
     } catch {
-      // Unreadable storage — the defaults are fine.
+      // Corrupted value — the defaults are fine.
     }
     setHydrated(true)
   }, [])
 
   useEffect(() => {
     if (!hydrated) return
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
-    } catch {
-      // Storage blocked — preferences stay session-only.
-    }
+    writeStored(STORAGE_NAME, JSON.stringify(prefs))
   }, [prefs, hydrated])
 
   return [prefs, (patch) => setPrefs((p) => ({ ...p, ...patch }))]

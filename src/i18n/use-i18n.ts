@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
+import { readStored, writeStored } from '@/lib/storage'
 import { LOCALES, type Dictionary, type LocaleKey } from './locales'
 
-const STORAGE_KEY = 'mawster-tierlist:locale'
+const STORAGE_NAME = 'locale'
 
 function detect(): LocaleKey {
-  const stored = localStorage.getItem(STORAGE_KEY)
+  const stored = readStored(STORAGE_NAME)
   if (stored === 'en' || stored === 'fr') return stored
   return navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en'
 }
@@ -21,7 +22,7 @@ export function useI18n(): { t: Dictionary; locale: LocaleKey; setLocale: (l: Lo
   useEffect(() => setLocaleState(detect()), [])
 
   const setLocale = useCallback((l: LocaleKey) => {
-    localStorage.setItem(STORAGE_KEY, l)
+    writeStored(STORAGE_NAME, l)
     setLocaleState(l)
     document.documentElement.lang = l
   }, [])

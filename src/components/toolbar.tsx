@@ -7,15 +7,12 @@ import {
   SwatchIcon,
 } from '@heroicons/react/24/solid'
 import { cn } from '@/lib/cn'
-import { FRAME_OPTIONS, type FrameOption } from '@/lib/types'
 import type { LocaleKey } from '@/i18n/locales'
 import type { Dictionary } from '@/i18n/locales'
 
 interface ToolbarProps {
   title: string
   onTitleChange: (title: string) => void
-  frame: FrameOption
-  onFrameChange: (frame: FrameOption) => void
   cardSize: number
   onCardSizeChange: (size: number) => void
   showNames: boolean
@@ -39,8 +36,6 @@ const buttonClass =
 export default function Toolbar({
   title,
   onTitleChange,
-  frame,
-  onFrameChange,
   cardSize,
   onCardSizeChange,
   showNames,
@@ -58,12 +53,6 @@ export default function Toolbar({
   t,
 }: Readonly<ToolbarProps>) {
   const fileInput = useRef<HTMLInputElement>(null)
-
-  const frameLabel: Record<FrameOption, string> = {
-    '7': t.frame7,
-    '6': t.frame6,
-    none: t.frameNone,
-  }
 
   return (
     <div className='flex flex-col gap-3 rounded-lg border border-border bg-card p-3'>
@@ -87,22 +76,6 @@ export default function Toolbar({
       </div>
 
       <div className='flex flex-wrap items-center gap-2'>
-        <select
-          value={frame}
-          onChange={(e) => onFrameChange(e.target.value as FrameOption)}
-          aria-label={t.frame}
-          className='rounded-md border border-border bg-input px-2 py-1.5 text-xs font-semibold outline-none focus:border-ring'
-        >
-          {FRAME_OPTIONS.map((option) => (
-            <option
-              key={option}
-              value={option}
-            >
-              {frameLabel[option]}
-            </option>
-          ))}
-        </select>
-
         <label className='flex items-center gap-2 text-xs font-semibold text-muted-foreground'>
           {t.cardSize}
           <input

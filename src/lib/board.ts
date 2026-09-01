@@ -1,8 +1,16 @@
 import { CHAMPIONS_BY_ID } from '@/data/champions'
-import type { AttributeKey, BoardState, ChampionAttributes, Tier } from './types'
-import { FRAME_OPTIONS } from './types'
+import { readStored, writeStored } from './storage'
+import { ATTRIBUTE_KEYS } from './types'
+import type {
+  AttributeKey,
+  BoardState,
+  Champion,
+  ChampionAttributes,
+  FrameOption,
+  Tier,
+} from './types'
 
-export const STORAGE_KEY = 'mawster-tierlist:board'
+const STORAGE_NAME = 'board'
 
 /** Classic tier-maker ramp, warm to cool. Reused when the user adds a tier. */
 export const TIER_PALETTE = [
@@ -39,7 +47,6 @@ export function defaultBoard(): BoardState {
     tiers: defaultTiers(),
     attributes: {},
     iconChoices: {},
-    frame: '7',
     title: '',
   }
 }
@@ -78,13 +85,14 @@ export function normalizeBoard(input: unknown): BoardState | null {
       const flags = (value as ChampionAttributes).flags
       const sig = (value as ChampionAttributes).sig
       attributes[id] = {
-        flags: flags && typeof flags === 'object' ? flags : {},
+        // Keep only keys the app still knows: a board exported before an
+        // attribute was retired would otherwise carry a flag nothing reads.
+        flags: knownFlags(flags),
         ...(typeof sig === 'number' && Number.isFinite(sig) ? { sig } : {}),
       }
     }
   }
 
-  const frame = FRAME_OPTIONS.includes(raw.frame as never) ? raw.frame! : '7'
   const iconChoices =
     raw.iconChoices && typeof raw.iconChoices === 'object'
       ? (raw.iconChoices as Partial<Record<AttributeKey, string>>)
@@ -95,29 +103,34 @@ export function normalizeBoard(input: unknown): BoardState | null {
     tiers,
     attributes,
     iconChoices,
-    frame,
     title: typeof raw.title === 'string' ? raw.title : '',
   }
 }
 
+/** Drop attribute flags that are not in `ATTRIBUTE_KEYS` any more. */
+function knownFlags(flags: unknown): Partial<Record<AttributeKey, boolean>> {
+  if (!flags || typeof flags !== 'object') return {}
+  const source = flags as Partial<Record<AttributeKey, boolean>>
+  const kept: Partial<Record<AttributeKey, boolean>> = {}
+  for (const key of ATTRIBUTE_KEYS) {
+    if (source[key]) kept[key] = true
+  }
+  return kept
+}
+
 export function loadBoard(): BoardState {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = readStored(STORAGE_NAME)
     if (!raw) return defaultBoard()
     return normalizeBoard(JSON.parse(raw)) ?? defaultBoard()
   } catch {
-    // Corrupted or unreadable storage (private mode, quota, hand-edited value):
-    // a fresh board beats a blank screen.
+    // Corrupted or hand-edited value: a fresh board beats a blank screen.
     return defaultBoard()
   }
 }
 
 export function saveBoard(board: BoardState): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(board))
-  } catch {
-    // Storage full or blocked — the board stays usable for this session.
-  }
+  writeStored(STORAGE_NAME, JSON.stringify(board))
 }
 
 /** Champion ids sitting in a tier, i.e. everything the pool must not show. */
@@ -127,4 +140,21 @@ export function rankedIds(board: BoardState): Set<string> {
 
 export function attributesOf(board: BoardState, championId: string): ChampionAttributes {
   return board.attributes[championId] ?? { flags: {} }
+}
+
+/**
+ * Which star frame a champion is drawn in. Rarity is a property of the champion,
+ * not a display toggle: a 6-star-locked champion is always shown in the 6★
+ * frame, everything else in the 7★ one.
+ *
+ * The `six` tag is the editable source — the roster export carries no 7-star
+ * column — with `isSevenStar` from `overrides.ts` as the hard-coded fallback.
+ */
+export function frameFor(champion: Champion, attributes: ChampionAttributes): FrameOption {
+  return attributes.flags.six || !champion.isSevenStar ? '6' : '7'
+}
+
+/** True when the champion has no 7-star version. */
+export function isSixStarLocked(champion: Champion, attributes: ChampionAttributes): boolean {
+  return Boolean(attributes.flags.six) || !champion.isSevenStar
 }

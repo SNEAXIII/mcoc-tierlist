@@ -170,8 +170,6 @@ export default function App() {
         <Toolbar
           title={board.title}
           onTitleChange={actions.setTitle}
-          frame={board.frame}
-          onFrameChange={actions.setFrame}
           cardSize={prefs.cardSize}
           onCardSizeChange={(cardSize) => setPrefs({ cardSize })}
           showNames={prefs.showNames}
@@ -283,7 +281,6 @@ export default function App() {
                 attributes={attributesOf(board, draggingChampion.id)}
                 iconChoices={board.iconChoices}
                 size={prefs.cardSize}
-                frame={board.frame}
                 showName={prefs.showNames}
                 showBadges={prefs.showBadges}
               />

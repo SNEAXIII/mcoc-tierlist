@@ -22,7 +22,7 @@ function slugifyTitle(title: string): string {
     .replace(/[^a-zA-Z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
     .toLowerCase()
-  return slug || 'mawster-tierlist'
+  return slug || 'mcoc-tierlist'
 }
 
 export function exportJson(board: BoardState): void {

@@ -15,8 +15,8 @@ Champion artwork and star frames are loaded from `https://www.mawster.app/static
 
 - 5 tiers by default, tier-maker style: rename, recolour, reorder, add and remove rows.
 - Move champions by drag & drop (mouse, touch, keyboard) or by tapping one and picking a tier.
-- Portraits use the in-game 7★ star frame (6★ and frameless are options) and the ascension badge.
-- Seven per-champion attributes that double as pool filters; `awk` carries a signature value shown as `x200`.
+- Portraits use the in-game star frame — 6★ or 7★ per champion — and the ascension badge.
+- Per-champion attributes that double as pool filters; `awk` carries a signature value shown as `x200`.
 - Filters: search (name + alias, accent-insensitive), class, ascendable, 7★ availability, prefight.
 - JSON import/export, and a 2–4× PNG capture of the board.
 - Dark UI, responsive down to phone widths, English / French.
@@ -32,12 +32,11 @@ npm run preview  # serve the production build
 
 ## Champion data
 
-`src/data/champions.json` is generated from a Mawster champion export and
-committed — the app never fetches a champion list at runtime, and champions
+`src/data/champions.json` is generated from a roster export and committed — the app never fetches a champion list at runtime, and champions
 cannot be added from the UI.
 
 ```bash
-node scripts/build-champions.mjs ~/Mawster/api/src/fixtures/champions_2026-08-26.json
+node scripts/build-champions.mjs ~/roster-export/champions.json
 ```
 
 Each entry needs `name`, `champion_class` and `image_url`; `alias`,
@@ -46,9 +45,9 @@ Each entry needs `name`, `champion_class` and `image_url`; `alias`,
 Everything the export does not carry lives in **`src/data/overrides.ts`**, the one
 file to edit by hand:
 
-| Constant | Purpose |
-| --- | --- |
-| `HARD_BANNED_IDS` | Non-playable champions (bosses, minions). Dropped from the app entirely. |
+| Constant             | Purpose                                                                             |
+| -------------------- | ----------------------------------------------------------------------------------- |
+| `HARD_BANNED_IDS`    | Non-playable champions (bosses, minions). Dropped from the app entirely.            |
 | `NOT_SEVEN_STAR_IDS` | Champions with no 7★ version, i.e. the exceptions behind the `7★ available` filter. |
 
 Both are keyed by champion id — the slug of the name (`Abomination (Immortal)` →
@@ -61,15 +60,20 @@ survives a data refresh.
 
 ## Attributes
 
-| Key | Badge | Notes |
-| --- | --- | --- |
-| `atk` | sword | |
-| `def` | shield | |
-| `dual` | sword + shield | |
-| `ga` | flame | "threat" |
-| `bg` | trophy | battlegrounds |
-| `asc` | gold medal | |
-| `awk` | gem | carries a number, rendered as `x200` on the badge |
+| Key    | Badge          | Notes                                                                           |
+| ------ | -------------- | ------------------------------------------------------------------------------- |
+| `six`  | `6★` text      | champion has no 7-star version — **decides which star frame the portrait uses** |
+| `atk`  | sword          |                                                                                 |
+| `def`  | shield         |                                                                                 |
+| `dual` | sword + shield | "dual threat", one term                                                         |
+| `ga`   | crossed swords | alliance war                                                                    |
+| `bg`   | trophy         | battlegrounds                                                                   |
+| `awk`  | gem            | carries a number, rendered as `x200` on the badge                               |
+
+Ascension is **not** a tag: it comes from `isAscendable` in the roster data and
+draws the in-game badge on the portrait by itself. Rarity has no display toggle
+either — a champion tagged `six` is always drawn in the 6★ frame, everything
+else in the 7★ one.
 
 Badge, filter and icon-picker entry are all driven from `ATTRIBUTES` in
 `src/lib/icons.tsx` — adding an attribute or swapping an icon is a change to that
@@ -85,11 +89,14 @@ with the board. Dropping in final artwork later means adding an entry to
 
 ## Storage
 
-| Key | Contents |
-| --- | --- |
-| `mawster-tierlist:board` | tiers, attributes, icon choices, frame, title — this is what Export JSON writes |
-| `mawster-tierlist:prefs` | card size, name/badge visibility — per-browser, deliberately *not* exported |
-| `mawster-tierlist:locale` | `en` / `fr` |
+| Key                    | Contents                                                                    |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `mcoc-tierlist:board`  | tiers, attributes, icon choices, title — this is what Export JSON writes    |
+| `mcoc-tierlist:prefs`  | card size, name/badge visibility — per-browser, deliberately _not_ exported |
+| `mcoc-tierlist:locale` | `en` / `fr`                                                                 |
+
+Values saved under the pre-rename `mawster-tierlist:` prefix are migrated across
+on first read, so an existing board survives the rename.
 
 An imported file is normalised before it is applied: unknown champion ids
 (renamed, or newly hard-banned) are dropped rather than left as cards that cannot
@@ -115,4 +122,4 @@ Pages must be enabled once, in **Settings → Pages → Source: GitHub Actions**
 
 ## Licence
 
-AGPL-3.0-or-later, same as [Mawster](https://github.com/SNEAXIII/Mawster).
+AGPL-3.0-or-later.
