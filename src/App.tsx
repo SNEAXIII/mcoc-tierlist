@@ -12,13 +12,14 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
-import { PlusIcon } from '@heroicons/react/24/solid'
+import { PlayIcon, PlusIcon } from '@heroicons/react/24/solid'
 import Toolbar from '@/components/toolbar'
 import FilterBar from '@/components/filter-bar'
 import TierRow from '@/components/tier-row'
 import ChampionPool from '@/components/champion-pool'
 import ChampionSheet from '@/components/champion-sheet'
 import IconMockup from '@/components/icon-mockup'
+import ReviewMode from '@/components/review-mode'
 import { ChampionCardVisual } from '@/components/champion-card'
 import { BANNED_COUNT, CHAMPIONS, CHAMPIONS_BY_ID } from '@/data/champions'
 import { attributesOf, rankedIds } from '@/lib/board'
@@ -27,6 +28,7 @@ import { exportJson, exportPng, importJson } from '@/lib/export'
 import { POOL_ID, useBoard } from '@/lib/use-board'
 import { usePrefs } from '@/lib/use-prefs'
 import { useI18n } from '@/i18n/use-i18n'
+import { useAnonymousImages } from '@/lib/asset-mode'
 import { cn } from '@/lib/cn'
 
 /** Let the browser paint the export-only styles before snapdom reads the DOM. */
@@ -38,6 +40,7 @@ function nextFrames(): Promise<void> {
 
 export default function App() {
   const { t, locale, setLocale } = useI18n()
+  const canReadImages = useAnonymousImages()
   const { board, hydrated, actions } = useBoard()
   const [prefs, setPrefs] = usePrefs()
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS)
@@ -45,6 +48,8 @@ export default function App() {
   const [iconsOpen, setIconsOpen] = useState(false)
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
+  // Snapshot of the filtered pool taken when a review starts; null when idle.
+  const [reviewQueue, setReviewQueue] = useState<string[] | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const boardRef = useRef<HTMLDivElement>(null)
 
@@ -95,6 +100,13 @@ export default function App() {
 
   const handleExportPng = async () => {
     if (!boardRef.current) return
+    // snapdom silently substitutes alt-text boxes for images it cannot read,
+    // so a capture without CORS produces a broken PNG rather than an error.
+    // Refuse up front instead of handing the user a file full of grey squares.
+    if (!canReadImages) {
+      setNotice(t.exportPngBlocked)
+      return
+    }
     setExporting(true)
     try {
       await nextFrames()
@@ -219,6 +231,16 @@ export default function App() {
               total={CHAMPIONS.length}
               t={t}
             />
+            <button
+              type='button'
+              onClick={() => setReviewQueue(poolChampions.map((c) => c.id))}
+              disabled={poolChampions.length === 0}
+              title={t.reviewStart(poolChampions.length)}
+              className='inline-flex w-fit items-center gap-1.5 rounded-md border border-primary/50 bg-elevated px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-40 disabled:hover:bg-elevated disabled:hover:text-primary'
+            >
+              <PlayIcon className='h-4 w-4' />
+              {t.review} ({poolChampions.length})
+            </button>
             <ChampionPool
               champions={poolChampions}
               board={board}
@@ -258,6 +280,15 @@ export default function App() {
         t={t}
         onClose={() => setOpenChampionId(null)}
       />
+      {reviewQueue && (
+        <ReviewMode
+          championIds={reviewQueue}
+          board={board}
+          actions={actions}
+          t={t}
+          onClose={() => setReviewQueue(null)}
+        />
+      )}
       <IconMockup
         open={iconsOpen}
         onClose={() => setIconsOpen(false)}
