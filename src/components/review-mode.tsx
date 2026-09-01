@@ -130,11 +130,11 @@ export default function ReviewMode({
           <div className='m-auto flex flex-col items-center gap-4 px-4 py-5'>
             <ChampionPortrait
               champion={champion}
-              size={200}
+              size={168}
               frame={frameFor(champion, attrs)}
             />
             <div className='text-center'>
-              <h2 className='text-xl font-black leading-tight'>{champion.name}</h2>
+              <h2 className='text-lg font-black leading-tight'>{champion.name}</h2>
               <p className='text-xs text-muted-foreground'>
                 {champion.championClass}
                 {champion.isAscendable && ' · ASC'}
@@ -179,28 +179,23 @@ export default function ReviewMode({
               </label>
             )}
 
-            <div className='grid w-full max-w-2xl grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4'>
-              {board.tiers.map((tier, i) => (
+            <div className='flex max-w-2xl flex-wrap justify-center gap-1.5'>
+              {board.tiers.map((tier) => (
                 <button
                   key={tier.id}
                   type='button'
                   onClick={() => assign(tier.id)}
                   style={{ backgroundColor: tier.color, color: readableTextColor(tier.color) }}
                   className={cn(
-                    'flex items-center justify-center gap-2 rounded-lg px-3 py-3 text-lg font-black transition-transform',
-                    'hover:scale-[1.02] active:scale-95',
+                    'flex min-w-[4.5rem] items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5',
+                    'text-base font-black transition-transform hover:scale-[1.03] active:scale-95',
                     currentTierId === tier.id &&
                       'ring-2 ring-foreground ring-offset-2 ring-offset-background'
                   )}
                 >
-                  {i < HOTKEY_LIMIT && (
-                    <kbd className='rounded bg-black/25 px-1.5 py-0.5 text-[11px] font-bold'>
-                      {i + 1}
-                    </kbd>
-                  )}
                   {tier.label}
                   {/* Live count — it ticks up as the run fills the row. */}
-                  <span className='rounded-full bg-black/20 px-2 py-0.5 text-xs font-bold tabular-nums'>
+                  <span className='rounded-full bg-black/20 px-1.5 py-0.5 text-[11px] font-bold tabular-nums'>
                     {tier.championIds.length}
                   </span>
                 </button>
