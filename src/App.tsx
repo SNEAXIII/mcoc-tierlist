@@ -50,6 +50,8 @@ export default function App() {
   const [exporting, setExporting] = useState(false)
   // Snapshot of the filtered pool taken when a review starts; null when idle.
   const [reviewQueue, setReviewQueue] = useState<string[] | null>(null)
+  // Whether a review also walks champions already sitting in a tier.
+  const [reviewPlaced, setReviewPlaced] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const boardRef = useRef<HTMLDivElement>(null)
 
@@ -65,6 +67,15 @@ export default function App() {
   const poolChampions = useMemo(
     () => CHAMPIONS.filter((c) => !ranked.has(c.id) && matchesFilters(c, filters, board)),
     [ranked, filters, board]
+  )
+  /**
+   * What a review walks: the filtered pool, plus — when asked — the champions
+   * already in a tier, so a past placement never makes one un-reviewable.
+   */
+  const reviewChampions = useMemo(
+    () =>
+      reviewPlaced ? CHAMPIONS.filter((c) => matchesFilters(c, filters, board)) : poolChampions,
+    [reviewPlaced, poolChampions, filters, board]
   )
   /**
    * The filters drive the tier rows as well as the pool, so narrowing to a class
@@ -208,16 +219,27 @@ export default function App() {
             total={CHAMPIONS.length}
             t={t}
           />
-          <button
-            type='button'
-            onClick={() => setReviewQueue(poolChampions.map((c) => c.id))}
-            disabled={poolChampions.length === 0}
-            title={t.reviewStart(poolChampions.length)}
-            className='inline-flex w-fit items-center gap-1.5 rounded-md border border-primary/50 bg-elevated px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-40 disabled:hover:bg-elevated disabled:hover:text-primary'
-          >
-            <PlayIcon className='h-4 w-4' />
-            {t.review} ({poolChampions.length})
-          </button>
+          <div className='flex flex-wrap items-center gap-2'>
+            <button
+              type='button'
+              onClick={() => setReviewQueue(reviewChampions.map((c) => c.id))}
+              disabled={reviewChampions.length === 0}
+              title={t.reviewStart(reviewChampions.length)}
+              className='inline-flex w-fit items-center gap-1.5 rounded-md border border-primary/50 bg-elevated px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-40 disabled:hover:bg-elevated disabled:hover:text-primary'
+            >
+              <PlayIcon className='h-4 w-4' />
+              {t.review} ({reviewChampions.length})
+            </button>
+            <label className='flex items-center gap-1.5 text-xs font-semibold text-muted-foreground'>
+              <input
+                type='checkbox'
+                checked={reviewPlaced}
+                onChange={(e) => setReviewPlaced(e.target.checked)}
+                className='accent-primary'
+              />
+              {t.reviewIncludePlaced}
+            </label>
+          </div>
         </section>
 
         <DndContext

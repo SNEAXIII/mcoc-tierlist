@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -44,37 +44,11 @@ export default function ReviewMode({
   onClose,
 }: Readonly<ReviewModeProps>) {
   const total = championIds.length
-  /** Champions already sitting in a tier — the review never presents these. */
-  const rankedIds = useMemo(
-    () => new Set(board.tiers.flatMap((tier) => tier.championIds)),
-    [board.tiers]
-  )
-
-  const [index, setIndex] = useState(() => {
-    const alreadyPlaced = new Set(board.tiers.flatMap((tier) => tier.championIds))
-    const first = championIds.findIndex((id) => !alreadyPlaced.has(id))
-    return first === -1 ? championIds.length : first
-  })
+  const [index, setIndex] = useState(0)
   const [placed, setPlaced] = useState<Record<string, string>>({})
   const [skipped, setSkipped] = useState<Set<string>>(() => new Set())
 
-  /**
-   * Walk from `from` in the given direction to the first champion that is not
-   * in a tier. Going forward past the end returns `total`, which is the "done"
-   * state; going back past the start returns -1, meaning "stay put".
-   */
-  const seek = useCallback(
-    (from: number, step: 1 | -1): number => {
-      for (let i = from; i >= 0 && i < total; i += step) {
-        if (!rankedIds.has(championIds[i])) return i
-      }
-      return step === 1 ? total : -1
-    },
-    [championIds, rankedIds, total]
-  )
-
   const done = index >= total
-  const champion = done ? undefined : CHAMPIONS_BY_ID.get(championIds[index])
 
   const assign = useCallback(
     (tierId: string) => {
@@ -82,23 +56,28 @@ export default function ReviewMode({
       if (!championId) return
       actions.moveChampion(championId, tierId)
       setPlaced((p) => ({ ...p, [championId]: tierId }))
-      // The champion just left the pool, so the next unplaced one is the target
-      // — `seek` also steps over anything placed earlier in the run.
-      setIndex(seek(index + 1, 1))
+      setIndex((i) => Math.min(i + 1, total))
     },
-    [actions, championIds, index, seek]
+    [actions, championIds, index, total]
   )
 
   const skip = useCallback(() => {
     const championId = championIds[index]
     if (championId) setSkipped((prev) => new Set(prev).add(championId))
-    setIndex(seek(index + 1, 1))
-  }, [championIds, index, seek])
+    setIndex((i) => Math.min(i + 1, total))
+  }, [championIds, index, total])
 
-  const back = useCallback(() => {
-    const previous = seek(index - 1, -1)
-    if (previous >= 0) setIndex(previous)
-  }, [index, seek])
+  const back = useCallback(() => setIndex((i) => Math.max(i - 1, 0)), [])
+
+  const champion = done ? undefined : CHAMPIONS_BY_ID.get(championIds[index])
+  /**
+   * The tier this champion is in right now, if any. Placing one does not take
+   * it out of the run — stepping back reaches it again and the highlighted
+   * button says where it landed, so a wrong call is fixed on the spot.
+   */
+  const currentTierId = champion
+    ? board.tiers.find((tier) => tier.championIds.includes(champion.id))?.id
+    : undefined
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -209,7 +188,9 @@ export default function ReviewMode({
                   style={{ backgroundColor: tier.color, color: readableTextColor(tier.color) }}
                   className={cn(
                     'flex items-center justify-center gap-2 rounded-lg px-3 py-3 text-lg font-black transition-transform',
-                    'hover:scale-[1.02] active:scale-95'
+                    'hover:scale-[1.02] active:scale-95',
+                    currentTierId === tier.id &&
+                      'ring-2 ring-foreground ring-offset-2 ring-offset-background'
                   )}
                 >
                   {i < HOTKEY_LIMIT && (
