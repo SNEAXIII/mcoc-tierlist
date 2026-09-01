@@ -1,0 +1,118 @@
+# MCOC Tier List
+
+Build **Marvel Contest of Champions tier lists** in the browser: drag champions
+into tiers, tag them with per-champion attributes, export the result as JSON or
+a PNG.
+
+Single-page React app, no backend, no account — every board lives in your
+browser's localStorage. Deployed to GitHub Pages.
+
+**→ https://sneaxiii.github.io/mcoc-tierlist/**
+
+Champion artwork and star frames are loaded from `https://www.mawster.app/static/…`.
+
+## Features
+
+- 5 tiers by default, tier-maker style: rename, recolour, reorder, add and remove rows.
+- Move champions by drag & drop (mouse, touch, keyboard) or by tapping one and picking a tier.
+- Portraits use the in-game 7★ star frame (6★ and frameless are options) and the ascension badge.
+- Seven per-champion attributes that double as pool filters; `awk` carries a signature value shown as `x200`.
+- Filters: search (name + alias, accent-insensitive), class, ascendable, 7★ availability, prefight.
+- JSON import/export, and a 2–4× PNG capture of the board.
+- Dark UI, responsive down to phone widths, English / French.
+
+## Develop
+
+```bash
+npm install
+npm run dev      # http://localhost:5173/mcoc-tierlist/
+npm run build    # typecheck + production build into dist/
+npm run preview  # serve the production build
+```
+
+## Champion data
+
+`src/data/champions.json` is generated from a Mawster champion export and
+committed — the app never fetches a champion list at runtime, and champions
+cannot be added from the UI.
+
+```bash
+node scripts/build-champions.mjs ~/Mawster/api/src/fixtures/champions_2026-08-26.json
+```
+
+Each entry needs `name`, `champion_class` and `image_url`; `alias`,
+`is_ascendable`, `has_prefight` and `is_7_star` are used when present.
+
+Everything the export does not carry lives in **`src/data/overrides.ts`**, the one
+file to edit by hand:
+
+| Constant | Purpose |
+| --- | --- |
+| `HARD_BANNED_IDS` | Non-playable champions (bosses, minions). Dropped from the app entirely. |
+| `NOT_SEVEN_STAR_IDS` | Champions with no 7★ version, i.e. the exceptions behind the `7★ available` filter. |
+
+Both are keyed by champion id — the slug of the name (`Abomination (Immortal)` →
+`abomination-immortal`). Ids are stable across regenerations, so a saved board
+survives a data refresh.
+
+> `NOT_SEVEN_STAR_IDS` ships empty: the current export has no 7-star column, so
+> every champion is treated as 7★-available. Fill it in to make that filter
+> meaningful.
+
+## Attributes
+
+| Key | Badge | Notes |
+| --- | --- | --- |
+| `atk` | sword | |
+| `def` | shield | |
+| `dual` | sword + shield | |
+| `ga` | flame | "threat" |
+| `bg` | trophy | battlegrounds |
+| `asc` | gold medal | |
+| `awk` | gem | carries a number, rendered as `x200` on the badge |
+
+Badge, filter and icon-picker entry are all driven from `ATTRIBUTES` in
+`src/lib/icons.tsx` — adding an attribute or swapping an icon is a change to that
+one table.
+
+### Icon mockup
+
+The **Icons** button opens a picker showing every candidate icon per attribute
+(Heroicons plus the hand-drawn ones Heroicons has no equivalent for, in
+`src/components/custom-icons.tsx`). The choice applies immediately and is saved
+with the board. Dropping in final artwork later means adding an entry to
+`ATTRIBUTES[key].variants`, nothing else.
+
+## Storage
+
+| Key | Contents |
+| --- | --- |
+| `mawster-tierlist:board` | tiers, attributes, icon choices, frame, title — this is what Export JSON writes |
+| `mawster-tierlist:prefs` | card size, name/badge visibility — per-browser, deliberately *not* exported |
+| `mawster-tierlist:locale` | `en` / `fr` |
+
+An imported file is normalised before it is applied: unknown champion ids
+(renamed, or newly hard-banned) are dropped rather than left as cards that cannot
+be moved.
+
+## PNG export
+
+The board is captured with [snapdom](https://github.com/zumerlab/snapdom) at 2–4×
+so it stays readable when zoomed. The portraits are cross-origin, so this only
+works if `www.mawster.app` answers with `Access-Control-Allow-Origin`. The app
+probes for that header once at startup: if it is missing, portraits are loaded
+without CORS so the artwork still shows, and the PNG export reports why it cannot
+run.
+
+## Deployment
+
+`.github/workflows/pages.yaml` builds and publishes to GitHub Pages on every push
+to `main`. `VITE_BASE` is set from the repository name, so the site is served at
+`https://<owner>.github.io/<repo>/`. For a custom domain, set `VITE_BASE=/` and
+add a `public/CNAME`.
+
+Pages must be enabled once, in **Settings → Pages → Source: GitHub Actions**.
+
+## Licence
+
+AGPL-3.0-or-later, same as [Mawster](https://github.com/SNEAXIII/Mawster).
