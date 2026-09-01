@@ -185,6 +185,10 @@ export default function ReviewMode({
                     </kbd>
                   )}
                   {tier.label}
+                  {/* Live count — it ticks up as the run fills the row. */}
+                  <span className='rounded-full bg-black/20 px-2 py-0.5 text-xs font-bold tabular-nums'>
+                    {tier.championIds.length}
+                  </span>
                 </button>
               ))}
             </div>
@@ -228,7 +232,9 @@ export default function ReviewMode({
           <ArrowLeftIcon className='h-4 w-4' />
           {t.previous}
         </button>
-        <span className='text-xs text-muted-foreground'>{t.reviewPlaced(placedCount)}</span>
+        <span className='text-xs tabular-nums text-muted-foreground'>
+          {t.reviewPlaced(placedCount)} · {t.reviewSkipped(Math.max(index - placedCount, 0))}
+        </span>
         <button
           type='button'
           onClick={skip}

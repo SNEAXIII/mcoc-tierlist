@@ -80,7 +80,9 @@ export const ATTRIBUTES: Record<AttributeKey, AttributeDefinition> = {
   },
   dual: {
     key: 'dual',
-    code: 'DUAL',
+    // One term, not "dual" plus "threat" — a champion that carries both attack
+    // and defence duty.
+    code: 'DUAL THREAT',
     chip: 'bg-violet-500/90 text-white ring-violet-300/60',
     accent:
       'data-[on=true]:bg-violet-500 data-[on=true]:text-white data-[on=true]:border-violet-400',
@@ -92,10 +94,15 @@ export const ATTRIBUTES: Record<AttributeKey, AttributeDefinition> = {
   },
   ga: {
     key: 'ga',
-    code: 'THREAT',
+    // Guerre d'Alliance / Alliance War. Unrelated to "dual threat" — the key is
+    // kept as `ga` so boards saved before the rename still load.
+    code: 'AW',
     chip: 'bg-amber-500/90 text-black ring-amber-300/60',
     accent: 'data-[on=true]:bg-amber-500 data-[on=true]:text-black data-[on=true]:border-amber-400',
     variants: [
+      { id: 'crossed', label: 'Crossed swords', Icon: CrossedSwordsIcon },
+      { id: 'flag', label: 'Flag (Heroicons)', Icon: FlagIcon },
+      { id: 'map', label: 'Map (Heroicons)', Icon: MapIcon },
       { id: 'fire', label: 'Fire (Heroicons)', Icon: FireIcon },
       { id: 'flame', label: 'Flame', Icon: FlameIcon },
       { id: 'warning', label: 'Warning (Heroicons)', Icon: ExclamationTriangleIcon },

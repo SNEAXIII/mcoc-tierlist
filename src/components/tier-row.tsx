@@ -12,6 +12,8 @@ import type { BoardState, Tier } from '@/lib/types'
 
 interface TierRowProps {
   tier: Tier
+  /** Champions of this tier that pass the current filters, in board order. */
+  visibleIds: string[]
   board: BoardState
   actions: BoardActions
   t: Dictionary
@@ -27,6 +29,7 @@ interface TierRowProps {
 
 export default function TierRow({
   tier,
+  visibleIds,
   board,
   actions,
   t,
@@ -75,10 +78,10 @@ export default function TierRow({
         )}
       >
         <SortableContext
-          items={tier.championIds}
+          items={visibleIds}
           strategy={rectSortingStrategy}
         >
-          {tier.championIds.map((id) => {
+          {visibleIds.map((id) => {
             const champion = CHAMPIONS_BY_ID.get(id)
             if (!champion) return null
             return (
@@ -97,12 +100,14 @@ export default function TierRow({
             )
           })}
         </SortableContext>
-        {tier.championIds.length === 0 && (
+        {visibleIds.length === 0 && (
           <span
             data-export-hide
             className='self-center px-2 text-xs text-muted-foreground'
           >
-            {t.emptyTier}
+            {tier.championIds.length === 0
+              ? t.emptyTier
+              : t.hiddenByFilters(tier.championIds.length)}
           </span>
         )}
       </div>

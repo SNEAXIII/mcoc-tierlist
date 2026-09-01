@@ -66,6 +66,24 @@ export default function App() {
     () => CHAMPIONS.filter((c) => !ranked.has(c.id) && matchesFilters(c, filters, board)),
     [ranked, filters, board]
   )
+  /**
+   * The filters drive the tier rows as well as the pool, so narrowing to a class
+   * or an attribute turns the whole board into that sub-list — and a PNG export
+   * captures exactly what is on screen.
+   */
+  const visibleByTier = useMemo(() => {
+    const map = new Map<string, string[]>()
+    for (const tier of board.tiers) {
+      map.set(
+        tier.id,
+        tier.championIds.filter((id) => {
+          const champion = CHAMPIONS_BY_ID.get(id)
+          return champion ? matchesFilters(champion, filters, board) : false
+        })
+      )
+    }
+    return map
+  }, [board, filters])
 
   /** Which container an id belongs to — a tier id, a champion id, or the pool. */
   const containerOf = useCallback(
@@ -181,6 +199,29 @@ export default function App() {
           </button>
         )}
 
+        {/* Above the board on purpose: these filters narrow the tier rows as well
+            as the pool, so they read as the whole page's controls. */}
+        <section className='flex flex-col gap-3 rounded-lg border border-border bg-card p-3'>
+          <FilterBar
+            filters={filters}
+            onChange={setFilters}
+            iconChoices={board.iconChoices}
+            shown={poolChampions.length}
+            total={CHAMPIONS.length}
+            t={t}
+          />
+          <button
+            type='button'
+            onClick={() => setReviewQueue(poolChampions.map((c) => c.id))}
+            disabled={poolChampions.length === 0}
+            title={t.reviewStart(poolChampions.length)}
+            className='inline-flex w-fit items-center gap-1.5 rounded-md border border-primary/50 bg-elevated px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-40 disabled:hover:bg-elevated disabled:hover:text-primary'
+          >
+            <PlayIcon className='h-4 w-4' />
+            {t.review} ({poolChampions.length})
+          </button>
+        </section>
+
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -198,6 +239,7 @@ export default function App() {
               <TierRow
                 key={tier.id}
                 tier={tier}
+                visibleIds={visibleByTier.get(tier.id) ?? []}
                 board={board}
                 actions={actions}
                 t={t}
@@ -223,24 +265,6 @@ export default function App() {
           </button>
 
           <section className='flex flex-col gap-3'>
-            <FilterBar
-              filters={filters}
-              onChange={setFilters}
-              iconChoices={board.iconChoices}
-              shown={poolChampions.length}
-              total={CHAMPIONS.length}
-              t={t}
-            />
-            <button
-              type='button'
-              onClick={() => setReviewQueue(poolChampions.map((c) => c.id))}
-              disabled={poolChampions.length === 0}
-              title={t.reviewStart(poolChampions.length)}
-              className='inline-flex w-fit items-center gap-1.5 rounded-md border border-primary/50 bg-elevated px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-40 disabled:hover:bg-elevated disabled:hover:text-primary'
-            >
-              <PlayIcon className='h-4 w-4' />
-              {t.review} ({poolChampions.length})
-            </button>
             <ChampionPool
               champions={poolChampions}
               board={board}
