@@ -34,12 +34,12 @@ export default function AttributeBadges({
             key={key}
             title={def.code}
             className={cn(
-              'inline-flex items-center gap-[1px] rounded-full px-[3px] font-bold leading-none ring-1',
+              'inline-flex items-center justify-center gap-[1px] rounded-full px-[2px] font-bold leading-none ring-1',
               def.chip
             )}
-            style={{ height: size, fontSize: size * 0.62 }}
+            style={{ height: size, minWidth: size, fontSize: size * 0.62 }}
           >
-            <Icon style={{ width: size * 0.72, height: size * 0.72 }} />
+            <Icon style={{ width: size * 0.7, height: size * 0.7 }} />
             {value && <span className='pr-[1px]'>{value}</span>}
           </span>
         )

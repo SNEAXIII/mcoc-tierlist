@@ -45,15 +45,17 @@ export function ChampionCardVisual({
           frame={frame}
           exporting={exporting}
         />
-        {showBadges && (
-          <AttributeBadges
-            attributes={attributes}
-            iconChoices={iconChoices}
-            size={Math.max(13, size * 0.26)}
-            className='absolute inset-x-0 -bottom-1 z-30'
-          />
-        )}
       </div>
+      {/* Badges sit below the portrait rather than over it — overlaid, they hid
+          the very artwork the card exists to show. */}
+      {showBadges && (
+        <AttributeBadges
+          attributes={attributes}
+          iconChoices={iconChoices}
+          size={Math.max(9, size * 0.17)}
+          className='mt-0.5'
+        />
+      )}
       {showName && (
         <span
           className='mt-1 w-full truncate text-center leading-tight text-muted-foreground'
@@ -73,7 +75,7 @@ export function ChampionCardVisual({
  * whole pool.
  */
 function ChampionCard({ onOpen, ...visual }: Readonly<ChampionCardProps>) {
-  const { champion, showBadges } = visual
+  const { champion } = visual
   const {
     attributes: dndAttributes,
     listeners,
@@ -94,8 +96,7 @@ function ChampionCard({ onOpen, ...visual }: Readonly<ChampionCardProps>) {
       className={cn(
         'no-select touch-manipulation rounded-md outline-none transition-shadow',
         'focus-visible:ring-2 focus-visible:ring-ring',
-        isDragging && 'opacity-30',
-        showBadges && 'pb-2'
+        isDragging && 'opacity-30'
       )}
       style={{ transform: CSS.Translate.toString(transform), transition }}
     >

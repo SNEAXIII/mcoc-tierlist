@@ -8,7 +8,7 @@ import {
   frameWindowRect,
   pickThumbnailSize,
 } from '@/lib/assets'
-import { useAnonymousImages } from '@/lib/asset-mode'
+import { useAnonymousImages, useReportImageFailure } from '@/lib/asset-mode'
 import type { Champion, FrameOption } from '@/lib/types'
 
 interface ChampionPortraitProps {
@@ -35,6 +35,10 @@ export default function ChampionPortrait({
   exporting = false,
 }: Readonly<ChampionPortraitProps>) {
   const anonymous = useAnonymousImages()
+  const reportFailure = useReportImageFailure()
+  // A cached non-CORS response reused for a CORS request fails here; falling
+  // back app-wide is what keeps the star frame from silently disappearing.
+  const onError = anonymous ? reportFailure : undefined
   // Re-keying on the mode forces a refetch when the CORS probe flips it.
   const crossOrigin = anonymous ? 'anonymous' : undefined
   const height = frame === 'none' ? size : size / FRAME_ASPECT
@@ -57,6 +61,7 @@ export default function ChampionPortrait({
           crossOrigin={crossOrigin}
           loading={loading}
           decoding='async'
+          onError={onError}
           className='pointer-events-none absolute inset-0 h-full w-full object-contain'
         />
       )}
@@ -67,6 +72,7 @@ export default function ChampionPortrait({
         crossOrigin={crossOrigin}
         loading={loading}
         decoding='async'
+        onError={onError}
         className='z-10 object-cover'
         style={{ ...windowStyle, objectPosition: `50% ${focusY * 100}%` }}
       />
@@ -78,6 +84,7 @@ export default function ChampionPortrait({
           crossOrigin={crossOrigin}
           loading={loading}
           decoding='async'
+          onError={onError}
           className='pointer-events-none absolute z-20'
           style={{
             width: size / 2.6,

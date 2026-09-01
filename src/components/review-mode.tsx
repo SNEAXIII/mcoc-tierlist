@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -43,10 +43,36 @@ export default function ReviewMode({
   t,
   onClose,
 }: Readonly<ReviewModeProps>) {
-  const [index, setIndex] = useState(0)
-  const [placed, setPlaced] = useState<Record<string, string>>({})
-
   const total = championIds.length
+  /** Champions already sitting in a tier — the review never presents these. */
+  const rankedIds = useMemo(
+    () => new Set(board.tiers.flatMap((tier) => tier.championIds)),
+    [board.tiers]
+  )
+
+  const [index, setIndex] = useState(() => {
+    const alreadyPlaced = new Set(board.tiers.flatMap((tier) => tier.championIds))
+    const first = championIds.findIndex((id) => !alreadyPlaced.has(id))
+    return first === -1 ? championIds.length : first
+  })
+  const [placed, setPlaced] = useState<Record<string, string>>({})
+  const [skipped, setSkipped] = useState<Set<string>>(() => new Set())
+
+  /**
+   * Walk from `from` in the given direction to the first champion that is not
+   * in a tier. Going forward past the end returns `total`, which is the "done"
+   * state; going back past the start returns -1, meaning "stay put".
+   */
+  const seek = useCallback(
+    (from: number, step: 1 | -1): number => {
+      for (let i = from; i >= 0 && i < total; i += step) {
+        if (!rankedIds.has(championIds[i])) return i
+      }
+      return step === 1 ? total : -1
+    },
+    [championIds, rankedIds, total]
+  )
+
   const done = index >= total
   const champion = done ? undefined : CHAMPIONS_BY_ID.get(championIds[index])
 
@@ -56,13 +82,23 @@ export default function ReviewMode({
       if (!championId) return
       actions.moveChampion(championId, tierId)
       setPlaced((p) => ({ ...p, [championId]: tierId }))
-      setIndex((i) => i + 1)
+      // The champion just left the pool, so the next unplaced one is the target
+      // — `seek` also steps over anything placed earlier in the run.
+      setIndex(seek(index + 1, 1))
     },
-    [actions, championIds, index]
+    [actions, championIds, index, seek]
   )
 
-  const skip = useCallback(() => setIndex((i) => Math.min(i + 1, total)), [total])
-  const back = useCallback(() => setIndex((i) => Math.max(i - 1, 0)), [])
+  const skip = useCallback(() => {
+    const championId = championIds[index]
+    if (championId) setSkipped((prev) => new Set(prev).add(championId))
+    setIndex(seek(index + 1, 1))
+  }, [championIds, index, seek])
+
+  const back = useCallback(() => {
+    const previous = seek(index - 1, -1)
+    if (previous >= 0) setIndex(previous)
+  }, [index, seek])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -83,7 +119,6 @@ export default function ReviewMode({
 
   const placedCount = Object.keys(placed).length
   const progress = total === 0 ? 0 : (Math.min(index, total) / total) * 100
-  const currentTierId = champion ? placed[champion.id] : undefined
   const attrs = champion ? attributesOf(board, champion.id) : undefined
 
   return (
@@ -174,9 +209,7 @@ export default function ReviewMode({
                   style={{ backgroundColor: tier.color, color: readableTextColor(tier.color) }}
                   className={cn(
                     'flex items-center justify-center gap-2 rounded-lg px-3 py-3 text-lg font-black transition-transform',
-                    'hover:scale-[1.02] active:scale-95',
-                    currentTierId === tier.id &&
-                      'ring-2 ring-foreground ring-offset-2 ring-offset-background'
+                    'hover:scale-[1.02] active:scale-95'
                   )}
                 >
                   {i < HOTKEY_LIMIT && (
@@ -233,7 +266,7 @@ export default function ReviewMode({
           {t.previous}
         </button>
         <span className='text-xs tabular-nums text-muted-foreground'>
-          {t.reviewPlaced(placedCount)} · {t.reviewSkipped(Math.max(index - placedCount, 0))}
+          {t.reviewPlaced(placedCount)} · {t.reviewSkipped(skipped.size)}
         </span>
         <button
           type='button'
