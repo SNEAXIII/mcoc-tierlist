@@ -67,7 +67,7 @@ Six tags the user sets, in `ATTRIBUTE_KEYS`:
 | `six` | none   | champion has no 7-star version — **decides which star frame the portrait uses** |
 | `atk` | sword  |                                                                                 |
 | `def` | shield | |
-| `ga`  | winged AW badge | alliance war                                                           |
+| `ga`  | flame  | alliance war                                                                    |
 | `bg`  | helmet | battlegrounds                                                                   |
 | `awk` | gem    | carries a number, rendered as `x200` on the badge                               |
 
