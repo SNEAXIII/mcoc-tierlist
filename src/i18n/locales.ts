@@ -50,8 +50,8 @@ export const en = {
   quit: 'Quit',
   exportPngBlocked:
     'PNG export is unavailable: the image host does not send Access-Control-Allow-Origin, so the portraits cannot be read back.',
-  exportPngError:
-    'PNG export failed: the image host must send an Access-Control-Allow-Origin header.',
+  exportPngError: (reason: string) =>
+    `PNG export failed: ${reason}. This is usually the image host not sending an Access-Control-Allow-Origin header.`,
   icons: 'Icons',
   iconMockup: 'Icon mockup',
   iconMockupHint:
@@ -122,8 +122,8 @@ export const fr: Dictionary = {
   quit: 'Quitter',
   exportPngBlocked:
     "Export PNG indisponible : l'hôte des images n'envoie pas Access-Control-Allow-Origin, les portraits ne peuvent pas être relus.",
-  exportPngError:
-    "Échec de l'export PNG : l'hôte des images doit renvoyer un en-tête Access-Control-Allow-Origin.",
+  exportPngError: (reason: string) =>
+    `Échec de l'export PNG : ${reason}. C'est en général l'hôte des images qui n'envoie pas d'en-tête Access-Control-Allow-Origin.`,
   icons: 'Icônes',
   iconMockup: 'Mockup des icônes',
   iconMockupHint:

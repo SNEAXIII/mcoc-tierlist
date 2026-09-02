@@ -5,14 +5,27 @@ import type { BoardState } from './types'
 const TARGET_EXPORT_WIDTH = 2400
 const MIN_EXPORT_SCALE = 2
 const MAX_EXPORT_SCALE = 4
+/**
+ * Ceiling on the exported bitmap. Mobile Safari refuses to allocate a canvas
+ * past roughly 16.7M pixels and hands back a blank one instead of throwing, so
+ * a long board at 4x would export as an empty image on a phone.
+ */
+const MAX_EXPORT_PIXELS = 16_000_000
 /** Safety net so a never-loading portrait can't block an export forever. */
 const IMAGE_WAIT_TIMEOUT_MS = 8000
+/** Long enough for the browser to have started the download before we revoke. */
+const OBJECT_URL_TTL_MS = 60_000
 
 function download(href: string, filename: string): void {
   const link = document.createElement('a')
   link.download = filename
   link.href = href
+  link.rel = 'noopener'
+  // In the document on purpose: a detached anchor's click is ignored by
+  // Firefox and by several mobile browsers.
+  document.body.appendChild(link)
   link.click()
+  link.remove()
 }
 
 function slugifyTitle(title: string): string {
@@ -42,10 +55,13 @@ export async function importJson(file: File): Promise<BoardState | null> {
 }
 
 function exportScale(element: HTMLElement): number {
-  const width = element.getBoundingClientRect().width
+  const { width, height } = element.getBoundingClientRect()
   if (!width) return MIN_EXPORT_SCALE
-  const scale = Math.ceil(TARGET_EXPORT_WIDTH / width)
-  return Math.min(MAX_EXPORT_SCALE, Math.max(MIN_EXPORT_SCALE, scale))
+  const wanted = Math.min(MAX_EXPORT_SCALE, Math.max(MIN_EXPORT_SCALE, Math.ceil(TARGET_EXPORT_WIDTH / width)))
+  // A tall board hits the canvas ceiling well before the width target does, and
+  // going over it costs the whole export — so the cap wins, even below 2x.
+  const cap = height ? Math.sqrt(MAX_EXPORT_PIXELS / (width * height)) : wanted
+  return Math.max(1, Math.min(wanted, cap))
 }
 
 /**
@@ -70,12 +86,46 @@ async function waitForImages(element: HTMLElement): Promise<void> {
   ])
 }
 
-/** Capture the tier board as a high-resolution PNG and trigger its download. */
+/** Turn snapdom's data URL into a real file, so it can be downloaded or shared. */
+async function toPngFile(dataUrl: string, filename: string): Promise<File> {
+  const blob = await (await fetch(dataUrl)).blob()
+  return new File([blob], filename, { type: 'image/png' })
+}
+
+/**
+ * Hand the file to the OS share sheet — "Save to Photos", "Save to Files", send
+ * it to a chat. This is the only path that reliably lands a picture on a phone:
+ * a `download` anchor on iOS opens the image in the tab instead of saving it.
+ * Returns false when sharing is unavailable or the user dismissed the sheet, so
+ * the caller can fall back to a plain download.
+ */
+async function shareFile(file: File): Promise<boolean> {
+  if (!navigator.canShare?.({ files: [file] })) return false
+  try {
+    await navigator.share({ files: [file] })
+    return true
+  } catch (error) {
+    // AbortError is the user closing the sheet — that is a finished export, not
+    // a failure to retry through a download they did not ask for.
+    return error instanceof DOMException && error.name === 'AbortError'
+  }
+}
+
+/** Capture the tier board as a high-resolution PNG and hand it to the user. */
 export async function exportPng(element: HTMLElement, board: BoardState): Promise<void> {
   await waitForImages(element)
   // Loaded on demand: snapdom is a third of the bundle and only the PNG
   // export needs it.
   const { snapdom } = await import('@zumer/snapdom')
   const png = await snapdom.toPng(element, { scale: exportScale(element), embedFonts: true })
-  download(png.src, `${slugifyTitle(board.title)}.png`)
+  const filename = `${slugifyTitle(board.title)}.png`
+  const file = await toPngFile(png.src, filename)
+
+  if (await shareFile(file)) return
+
+  // Blob URL rather than snapdom's data URL: a board's worth of base64 runs to
+  // several megabytes, and mobile browsers drop a download that big.
+  const url = URL.createObjectURL(file)
+  download(url, filename)
+  setTimeout(() => URL.revokeObjectURL(url), OBJECT_URL_TTL_MS)
 }

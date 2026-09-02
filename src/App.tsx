@@ -140,10 +140,13 @@ export default function App() {
     try {
       await nextFrames()
       await exportPng(boardRef.current, board)
-    } catch {
-      // Almost always a tainted canvas: the static host answered without
+    } catch (error) {
+      // Usually a tainted canvas: the static host answered without
       // `Access-Control-Allow-Origin`, so the portraits cannot be read back.
-      setNotice(t.exportPngError)
+      // Carry the real message anyway — on a phone the cause is as likely to be
+      // the canvas size or a blocked download, and "CORS" would send anyone
+      // chasing the wrong thing.
+      setNotice(t.exportPngError(error instanceof Error ? error.message : String(error)))
     } finally {
       setExporting(false)
     }
