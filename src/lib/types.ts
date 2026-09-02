@@ -17,9 +17,21 @@ export interface Champion {
   isSevenStar: boolean
 }
 
-/** Per-champion tags the user sets; each one is also a filter and a card badge. */
-export const ATTRIBUTE_KEYS = ['six', 'atk', 'def', 'dual', 'ga', 'bg', 'awk'] as const
+/** Per-champion tags the user sets; each one is also a filter. */
+export const ATTRIBUTE_KEYS = ['six', 'atk', 'def', 'ga', 'bg', 'awk'] as const
 export type AttributeKey = (typeof ATTRIBUTE_KEYS)[number]
+
+/**
+ * What a card badge can show. `dual` is not a tag anyone sets: a champion
+ * carrying both `atk` and `def` *is* a dual threat, so the two collapse into
+ * that single badge. `six` never gets a badge at all — the portrait frame is
+ * what says whether a champion is 6★.
+ */
+export const DUAL_KEY = 'dual'
+export type BadgeKey = AttributeKey | typeof DUAL_KEY
+
+/** Badge keys in display order, `dual` sitting where `atk`/`def` would be. */
+export const BADGE_KEYS = ['atk', 'def', 'dual', 'ga', 'bg', 'awk'] as const satisfies readonly BadgeKey[]
 
 export interface ChampionAttributes {
   /** Set attributes. Absent key means unset. */
@@ -42,8 +54,8 @@ export interface BoardState {
   version: 1
   tiers: Tier[]
   attributes: Record<string, ChampionAttributes>
-  /** Chosen icon variant per attribute — see `lib/icons.tsx`. */
-  iconChoices: Partial<Record<AttributeKey, string>>
+  /** Chosen icon variant per badge — see `lib/icons.tsx`. */
+  iconChoices: Partial<Record<BadgeKey, string>>
   title: string
 }
 

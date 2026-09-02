@@ -1,7 +1,8 @@
 import Modal from './modal'
+import AttributeIcon from './attribute-icon'
 import ToggleChip from './toggle-chip'
 import ChampionPortrait from './champion-portrait'
-import { ATTRIBUTE_LIST, attributeIcon } from '@/lib/icons'
+import { ATTRIBUTE_LIST } from '@/lib/icons'
 import { attributesOf, frameFor } from '@/lib/board'
 import { readableTextColor } from '@/lib/color'
 import type { BoardActions } from '@/lib/use-board'
@@ -66,20 +67,21 @@ export default function ChampionSheet({
             {t.editAttributes}
           </h3>
           <div className='flex flex-wrap gap-1.5'>
-            {ATTRIBUTE_LIST.map((def) => {
-              const Icon = attributeIcon(def.key, board.iconChoices[def.key])
-              return (
-                <ToggleChip
-                  key={def.key}
-                  on={!!attrs.flags[def.key]}
-                  onToggle={() => actions.toggleAttribute(champion.id, def.key)}
-                  accent={def.accent}
-                >
-                  <Icon className='h-4 w-4' />
-                  {def.code}
-                </ToggleChip>
-              )
-            })}
+            {ATTRIBUTE_LIST.map((def) => (
+              <ToggleChip
+                key={def.key}
+                on={!!attrs.flags[def.key]}
+                onToggle={() => actions.toggleAttribute(champion.id, def.key)}
+                accent={def.accent}
+              >
+                <AttributeIcon
+                  attribute={def.key}
+                  chosenId={board.iconChoices[def.key]}
+                  size={16}
+                />
+                {def.code}
+              </ToggleChip>
+            ))}
           </div>
 
           {attrs.flags.awk && (

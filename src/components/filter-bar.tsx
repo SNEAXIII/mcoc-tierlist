@@ -1,8 +1,9 @@
 import { MagnifyingGlassIcon, XCircleIcon } from '@heroicons/react/24/solid'
+import AttributeIcon from './attribute-icon'
 import ToggleChip from './toggle-chip'
-import { ATTRIBUTE_LIST, attributeIcon } from '@/lib/icons'
+import { ATTRIBUTE_LIST } from '@/lib/icons'
 import { EMPTY_FILTERS, hasActiveFilters, type FilterState } from '@/lib/filters'
-import { CHAMPION_CLASSES, type AttributeKey, type ChampionClass } from '@/lib/types'
+import { CHAMPION_CLASSES, type BadgeKey, type ChampionClass } from '@/lib/types'
 import type { Dictionary } from '@/i18n/locales'
 
 /** Class chips carry the in-game class colour so they read at a glance. */
@@ -20,7 +21,7 @@ const FLAG_ACCENT = 'data-[on=true]:bg-primary data-[on=true]:text-primary-foreg
 interface FilterBarProps {
   filters: FilterState
   onChange: (next: FilterState) => void
-  iconChoices: Partial<Record<AttributeKey, string>>
+  iconChoices: Partial<Record<BadgeKey, string>>
   shown: number
   total: number
   t: Dictionary
@@ -109,23 +110,24 @@ export default function FilterBar({
           className='mx-1 hidden h-4 w-px bg-border sm:block'
         />
 
-        {ATTRIBUTE_LIST.map((def) => {
-          const Icon = attributeIcon(def.key, iconChoices[def.key])
-          return (
-            <ToggleChip
-              key={def.key}
-              on={filters.attributes.includes(def.key)}
-              onToggle={() =>
-                onChange({ ...filters, attributes: toggleIn(filters.attributes, def.key) })
-              }
-              accent={def.accent}
-              title={def.code}
-            >
-              <Icon className='h-3.5 w-3.5' />
-              {def.code}
-            </ToggleChip>
-          )
-        })}
+        {ATTRIBUTE_LIST.map((def) => (
+          <ToggleChip
+            key={def.key}
+            on={filters.attributes.includes(def.key)}
+            onToggle={() =>
+              onChange({ ...filters, attributes: toggleIn(filters.attributes, def.key) })
+            }
+            accent={def.accent}
+            title={def.code}
+          >
+            <AttributeIcon
+              attribute={def.key}
+              chosenId={iconChoices[def.key]}
+              size={14}
+            />
+            {def.code}
+          </ToggleChip>
+        ))}
       </div>
     </div>
   )

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TIER_PALETTE, attributesOf, defaultBoard, loadBoard, newTierId, saveBoard } from './board'
-import type { AttributeKey, BoardState, Tier } from './types'
+import type { AttributeKey, BadgeKey, BoardState, Tier } from './types'
 
 /** Pool acts as a droppable container like any tier; this is its container id. */
 export const POOL_ID = 'pool'
@@ -136,7 +136,7 @@ export function useBoard() {
     })
   }, [])
 
-  const setIconChoice = useCallback((key: AttributeKey, variantId: string) => {
+  const setIconChoice = useCallback((key: BadgeKey, variantId: string) => {
     setBoard((b) => ({ ...b, iconChoices: { ...b.iconChoices, [key]: variantId } }))
   }, [])
 

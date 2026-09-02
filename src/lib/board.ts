@@ -3,6 +3,7 @@ import { readStored, writeStored } from './storage'
 import { ATTRIBUTE_KEYS } from './types'
 import type {
   AttributeKey,
+  BadgeKey,
   BoardState,
   Champion,
   ChampionAttributes,
@@ -95,7 +96,7 @@ export function normalizeBoard(input: unknown): BoardState | null {
 
   const iconChoices =
     raw.iconChoices && typeof raw.iconChoices === 'object'
-      ? (raw.iconChoices as Partial<Record<AttributeKey, string>>)
+      ? (raw.iconChoices as Partial<Record<BadgeKey, string>>)
       : {}
 
   return {
@@ -107,13 +108,23 @@ export function normalizeBoard(input: unknown): BoardState | null {
   }
 }
 
-/** Drop attribute flags that are not in `ATTRIBUTE_KEYS` any more. */
+/**
+ * Drop attribute flags that are not in `ATTRIBUTE_KEYS` any more.
+ *
+ * `dual` used to be one of them. It is derived now — a champion tagged both
+ * `atk` and `def` is a dual threat — so a board that carries the old flag has
+ * it folded back into those two rather than losing the marking.
+ */
 function knownFlags(flags: unknown): Partial<Record<AttributeKey, boolean>> {
   if (!flags || typeof flags !== 'object') return {}
-  const source = flags as Partial<Record<AttributeKey, boolean>>
+  const source = flags as Partial<Record<AttributeKey, boolean>> & { dual?: boolean }
   const kept: Partial<Record<AttributeKey, boolean>> = {}
   for (const key of ATTRIBUTE_KEYS) {
     if (source[key]) kept[key] = true
+  }
+  if (source.dual) {
+    kept.atk = true
+    kept.def = true
   }
   return kept
 }
