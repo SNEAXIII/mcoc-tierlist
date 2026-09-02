@@ -1,16 +1,16 @@
 import Modal from './modal'
 import AttributeBadges from './attribute-badges'
 import AttributeIcon from './attribute-icon'
-import { ATTRIBUTE_LIST, attributeChip } from '@/lib/icons'
+import { ATTRIBUTE_LIST, ICON_PICKER_LIST, attributeChip } from '@/lib/icons'
 import { cn } from '@/lib/cn'
 import type { BoardActions } from '@/lib/use-board'
-import type { AttributeKey } from '@/lib/types'
+import type { AttributeKey, BadgeKey } from '@/lib/types'
 import type { Dictionary } from '@/i18n/locales'
 
 interface IconMockupProps {
   open: boolean
   onClose: () => void
-  iconChoices: Partial<Record<AttributeKey, string>>
+  iconChoices: Partial<Record<BadgeKey, string>>
   actions: BoardActions
   t: Dictionary
 }
@@ -18,8 +18,12 @@ interface IconMockupProps {
 /**
  * Side-by-side comparison of every candidate icon per attribute, with a live
  * badge preview underneath. The in-game artwork is the default for every
- * attribute; the vector glyphs stay listed behind it, and adding another asset
- * is a new entry in `ATTRIBUTES[key].variants`, nothing else.
+ * badge; the vector glyphs stay listed behind it, and adding another asset is a
+ * new entry in `ATTRIBUTES[key].variants`, nothing else.
+ *
+ * `six` is absent on purpose — it draws no badge, so it has no icon to pick.
+ * The preview row shows `atk` and `def` as the single `dual` badge they
+ * collapse into, which is exactly what a card shows.
  */
 export default function IconMockup({
   open,
@@ -54,7 +58,7 @@ export default function IconMockup({
           />
         </div>
 
-        {ATTRIBUTE_LIST.map((def) => {
+        {ICON_PICKER_LIST.map((def) => {
           const selected = iconChoices[def.key] ?? def.variants[0].id
           return (
             <section

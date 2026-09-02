@@ -60,20 +60,30 @@ survives a data refresh.
 
 ## Attributes
 
-| Key    | Badge          | Notes                                                                           |
-| ------ | -------------- | ------------------------------------------------------------------------------- |
-| `six`  | `6★` text      | champion has no 7-star version — **decides which star frame the portrait uses** |
-| `atk`  | sword          |                                                                                 |
-| `def`  | shield         |                                                                                 |
-| `dual` | sword + shield | "dual threat", one term                                                         |
-| `ga`   | crossed swords | alliance war                                                                    |
-| `bg`   | trophy         | battlegrounds                                                                   |
-| `awk`  | gem            | carries a number, rendered as `x200` on the badge                               |
+Six tags the user sets, in `ATTRIBUTE_KEYS`:
 
-Ascension is **not** a tag: it comes from `isAscendable` in the roster data and
-draws the in-game badge on the portrait by itself. Rarity has no display toggle
-either — a champion tagged `six` is always drawn in the 6★ frame, everything
-else in the 7★ one.
+| Key   | Badge  | Notes                                                                           |
+| ----- | ------ | ------------------------------------------------------------------------------- |
+| `six` | none   | champion has no 7-star version — **decides which star frame the portrait uses** |
+| `atk` | sword  |                                                                                 |
+| `def` | shield | |
+| `ga`  | winged AW badge | alliance war                                                           |
+| `bg`  | helmet | battlegrounds                                                                   |
+| `awk` | gem    | carries a number, rendered as `x200` on the badge                               |
+
+Two of those never show up on a card the way they are stored:
+
+- **`dual`** is derived, not tagged. A champion carrying both `atk` and `def`
+  *is* a dual threat, so the two collapse into one sword + shield badge instead
+  of printing both. It has no toggle and no filter — selecting ATK and DEF
+  together already filters to exactly those champions. Boards saved while `dual`
+  was still a tag have it folded back into `atk` + `def` on load.
+- **`six`** draws no badge at all. The portrait is already in the 6★ frame,
+  which is what tells a 6-star champion from a 7-star one; a badge saying the
+  same thing again was noise. It stays a toggle and a filter.
+
+Ascension is **not** a tag either: it comes from `isAscendable` in the roster
+data and draws the in-game badge on the portrait by itself.
 
 Badge, filter and icon-picker entry are all driven from `ATTRIBUTES` in
 `src/lib/icons.tsx` — adding an attribute or swapping an icon is a change to that
@@ -81,14 +91,15 @@ one table.
 
 ### Icon mockup
 
-The **Icons** button opens a picker showing every candidate icon per attribute.
-Each one defaults to the in-game artwork in `src/assets/icons/` (PNGs with their
-own colours, drawn on a dark disc ringed in the attribute's colour); behind it
-sit the vector fallbacks — Heroicons plus the hand-drawn ones Heroicons has no
-equivalent for, in `src/components/custom-icons.tsx`. `6★` is the exception: it
-stays a text badge, because the star count is already carried by the portrait
-frame. The choice applies immediately and is saved with the board, and another
-asset is one more entry in `ATTRIBUTES[key].variants`, nothing else.
+The **Icons** button opens a picker showing every candidate icon per badge —
+the five tags that draw one, plus `dual`. Each defaults to the in-game artwork
+in `src/assets/icons/` (PNGs with their own colours, drawn on a dark disc ringed
+in the attribute's colour); behind it sit the vector fallbacks — Heroicons plus
+the hand-drawn ones Heroicons has no equivalent for, in
+`src/components/custom-icons.tsx`. `six` is not listed: it draws no badge, so
+there is nothing for a choice to change. The choice applies immediately and is
+saved with the board, and another asset is one more entry in
+`ATTRIBUTES[key].variants`, nothing else.
 
 ## Storage
 

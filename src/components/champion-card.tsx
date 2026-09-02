@@ -6,12 +6,12 @@ import AttributeBadges from './attribute-badges'
 import { cn } from '@/lib/cn'
 import { FRAME_ASPECT } from '@/lib/assets'
 import { frameFor } from '@/lib/board'
-import type { AttributeKey, Champion, ChampionAttributes } from '@/lib/types'
+import type { BadgeKey, Champion, ChampionAttributes } from '@/lib/types'
 
 export interface ChampionCardProps {
   champion: Champion
   attributes: ChampionAttributes
-  iconChoices: Partial<Record<AttributeKey, string>>
+  iconChoices: Partial<Record<BadgeKey, string>>
   size: number
   showName: boolean
   showBadges: boolean

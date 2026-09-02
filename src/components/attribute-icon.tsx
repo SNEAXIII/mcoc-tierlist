@@ -1,9 +1,9 @@
 import { attributeVariant } from '@/lib/icons'
 import { cn } from '@/lib/cn'
-import type { AttributeKey } from '@/lib/types'
+import type { BadgeKey } from '@/lib/types'
 
 interface AttributeIconProps {
-  attribute: AttributeKey
+  attribute: BadgeKey
   /** Variant id picked in the icon mockup; falls back to the attribute default. */
   chosenId?: string
   /** Glyph edge length in px. */

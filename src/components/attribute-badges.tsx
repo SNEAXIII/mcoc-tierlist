@@ -1,14 +1,30 @@
 import AttributeIcon from './attribute-icon'
 import { ATTRIBUTES, attributeChip, attributeVariant } from '@/lib/icons'
-import { ATTRIBUTE_KEYS, type AttributeKey, type ChampionAttributes } from '@/lib/types'
+import { BADGE_KEYS, type BadgeKey, type ChampionAttributes } from '@/lib/types'
 import { cn } from '@/lib/cn'
 
 interface AttributeBadgesProps {
   attributes: ChampionAttributes
-  iconChoices: Partial<Record<AttributeKey, string>>
+  iconChoices: Partial<Record<BadgeKey, string>>
   /** Badge height in px — scales with the card so badges stay legible. */
   size: number
   className?: string
+}
+
+/**
+ * Which badges a set of tags produces. `atk` + `def` collapse into the single
+ * `dual` badge — a champion that does both jobs is a dual threat, so showing
+ * all three would say the same thing twice. `six` produces no badge: the
+ * portrait is already drawn in the 6★ frame.
+ */
+function badgesFor(attributes: ChampionAttributes): BadgeKey[] {
+  const { flags } = attributes
+  const dual = Boolean(flags.atk && flags.def)
+  return BADGE_KEYS.filter((key) => {
+    if (key === 'dual') return dual
+    if (key === 'atk' || key === 'def') return Boolean(flags[key]) && !dual
+    return Boolean(flags[key])
+  })
 }
 
 /**
@@ -21,7 +37,7 @@ export default function AttributeBadges({
   size,
   className,
 }: Readonly<AttributeBadgesProps>) {
-  const active = ATTRIBUTE_KEYS.filter((key) => attributes.flags[key])
+  const active = badgesFor(attributes)
   if (active.length === 0) return null
 
   return (

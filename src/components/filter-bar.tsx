@@ -3,7 +3,7 @@ import AttributeIcon from './attribute-icon'
 import ToggleChip from './toggle-chip'
 import { ATTRIBUTE_LIST } from '@/lib/icons'
 import { EMPTY_FILTERS, hasActiveFilters, type FilterState } from '@/lib/filters'
-import { CHAMPION_CLASSES, type AttributeKey, type ChampionClass } from '@/lib/types'
+import { CHAMPION_CLASSES, type BadgeKey, type ChampionClass } from '@/lib/types'
 import type { Dictionary } from '@/i18n/locales'
 
 /** Class chips carry the in-game class colour so they read at a glance. */
@@ -21,7 +21,7 @@ const FLAG_ACCENT = 'data-[on=true]:bg-primary data-[on=true]:text-primary-foreg
 interface FilterBarProps {
   filters: FilterState
   onChange: (next: FilterState) => void
-  iconChoices: Partial<Record<AttributeKey, string>>
+  iconChoices: Partial<Record<BadgeKey, string>>
   shown: number
   total: number
   t: Dictionary

@@ -5,7 +5,6 @@ import {
   ExclamationTriangleIcon,
   FireIcon,
   FlagIcon,
-  LockClosedIcon,
   MapIcon,
   ShieldCheckIcon,
   ShieldExclamationIcon,
@@ -31,7 +30,7 @@ import artBg from '@/assets/icons/bg-helmet.png'
 import artDef from '@/assets/icons/def-shield.png'
 import artDual from '@/assets/icons/dual-sword-shield.png'
 import artFlame from '@/assets/icons/flame.png'
-import { ATTRIBUTE_KEYS, type AttributeKey } from './types'
+import { ATTRIBUTE_KEYS, BADGE_KEYS, type AttributeKey, type BadgeKey } from './types'
 
 export type IconComponent = ComponentType<SVGProps<SVGSVGElement>>
 
@@ -47,8 +46,8 @@ export interface IconVariant {
   text?: string
 }
 
-export interface AttributeDefinition {
-  key: AttributeKey
+export interface AttributeDefinition<K extends BadgeKey = BadgeKey> {
+  key: K
   /** Short code printed on the badge tooltip and used by the JSON export. */
   code: string
   /** Tailwind classes for the badge chip — background, ring and icon colour. */
@@ -69,27 +68,23 @@ export interface AttributeDefinition {
 }
 
 /**
- * The seven per-champion attributes. Each one is a card badge, a filter toggle
- * and an entry in the icon mockup — driving all three from this single list is
- * what keeps them from drifting apart.
+ * Every marker the board knows: the six tags the user sets plus the derived
+ * `dual` badge. Card badge, filter toggle and icon-picker entry all read from
+ * this one table, which is what keeps them from drifting apart.
  *
- * Every attribute now leads with the in-game artwork; the vector variants stay
- * behind it in the picker as a fallback for anyone who prefers the flat look.
+ * Each marker leads with the in-game artwork; the vector variants stay behind
+ * it in the picker as a fallback for anyone who prefers the flat look.
  */
-export const ATTRIBUTES: Record<AttributeKey, AttributeDefinition> = {
+export const ATTRIBUTES: { [K in BadgeKey]: AttributeDefinition<K> } = {
   six: {
     key: 'six',
     code: '6★',
     chip: 'bg-slate-200 text-black ring-slate-400/60',
     accent: 'data-[on=true]:bg-slate-200 data-[on=true]:text-black data-[on=true]:border-slate-300',
-    variants: [
-      // No artwork here on purpose: the star count is carried by the portrait
-      // frame. The text badge stays the marker — a star glyph would read as the
-      // ASC medal, and this one decides which frame the portrait is drawn in.
-      { id: 'text', label: '6★ (text)', text: '6★' },
-      { id: 'star', label: 'Star (Heroicons)', Icon: StarIcon },
-      { id: 'lock', label: 'Lock (Heroicons)', Icon: LockClosedIcon },
-    ],
+    // No glyph at all, on purpose: `six` draws no badge — it picks the portrait
+    // frame, and the frame is what tells a 6★ champion from a 7★ one. The code
+    // is still what the filter chip prints.
+    variants: [{ id: 'text', label: '6★ (text)', text: '6★' }],
   },
   atk: {
     key: 'atk',
@@ -120,8 +115,8 @@ export const ATTRIBUTES: Record<AttributeKey, AttributeDefinition> = {
   },
   dual: {
     key: 'dual',
-    // One term, not "dual" plus "threat" — a champion that carries both attack
-    // and defence duty.
+    // Derived, never tagged: a champion flagged both `atk` and `def` shows this
+    // badge instead of those two. One term, not "dual" plus "threat".
     code: 'DUAL THREAT',
     chip: 'bg-violet-500/90 text-white ring-violet-300/60',
     artChip: 'bg-slate-950/85 text-white ring-violet-400/70',
@@ -185,17 +180,26 @@ export const ATTRIBUTES: Record<AttributeKey, AttributeDefinition> = {
   },
 }
 
-export const ATTRIBUTE_LIST = ATTRIBUTE_KEYS.map((k) => ATTRIBUTES[k])
+/** The tags the user can set — the filter row and both attribute editors. */
+export const ATTRIBUTE_LIST: AttributeDefinition<AttributeKey>[] = ATTRIBUTE_KEYS.map(
+  (k) => ATTRIBUTES[k]
+)
 
-/** Resolve the variant for an attribute, honouring the user's pick. */
-export function attributeVariant(key: AttributeKey, chosenId?: string): IconVariant {
+/**
+ * Markers with an icon to choose, in badge order. `six` is left out: it prints
+ * no badge, so there would be nothing for a choice to change.
+ */
+export const ICON_PICKER_LIST: AttributeDefinition[] = BADGE_KEYS.map((k) => ATTRIBUTES[k])
+
+/** Resolve the variant for a marker, honouring the user's pick. */
+export function attributeVariant(key: BadgeKey, chosenId?: string): IconVariant {
   const def = ATTRIBUTES[key]
   const chosen = chosenId ? def.variants.find((v) => v.id === chosenId) : undefined
   return chosen ?? def.variants[0]
 }
 
 /** Badge chip classes — artwork needs the dark disc, flat glyphs the colour fill. */
-export function attributeChip(key: AttributeKey, variant: IconVariant): string {
+export function attributeChip(key: BadgeKey, variant: IconVariant): string {
   const def = ATTRIBUTES[key]
   return (variant.src && def.artChip) || def.chip
 }
