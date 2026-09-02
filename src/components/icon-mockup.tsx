@@ -1,6 +1,7 @@
 import Modal from './modal'
 import AttributeBadges from './attribute-badges'
-import { ATTRIBUTE_LIST } from '@/lib/icons'
+import AttributeIcon from './attribute-icon'
+import { ATTRIBUTE_LIST, attributeChip } from '@/lib/icons'
 import { cn } from '@/lib/cn'
 import type { BoardActions } from '@/lib/use-board'
 import type { AttributeKey } from '@/lib/types'
@@ -16,9 +17,9 @@ interface IconMockupProps {
 
 /**
  * Side-by-side comparison of every candidate icon per attribute, with a live
- * badge preview underneath. This is the mockup used to settle on a final icon
- * set before the custom artwork lands — swapping in a real asset later is a new
- * entry in `ATTRIBUTES[key].variants`, nothing else.
+ * badge preview underneath. The in-game artwork is the default for every
+ * attribute; the vector glyphs stay listed behind it, and adding another asset
+ * is a new entry in `ATTRIBUTES[key].variants`, nothing else.
  */
 export default function IconMockup({
   open,
@@ -65,28 +66,36 @@ export default function IconMockup({
                 {def.hasValue && <span className='ml-2 font-normal normal-case'>(+ x200)</span>}
               </h3>
               <div className='flex flex-wrap gap-2'>
-                {def.variants.map(({ id, label, Icon }) => (
+                {def.variants.map((variant) => (
                   <button
-                    key={id}
+                    key={variant.id}
                     type='button'
-                    onClick={() => actions.setIconChoice(def.key, id)}
-                    aria-pressed={selected === id}
+                    onClick={() => actions.setIconChoice(def.key, variant.id)}
+                    aria-pressed={selected === variant.id}
                     className={cn(
                       'flex w-24 flex-col items-center gap-1.5 rounded-lg border p-2 text-center transition-colors',
-                      selected === id
+                      selected === variant.id
                         ? 'border-primary bg-primary/10'
                         : 'border-border bg-card hover:border-muted-foreground'
                     )}
                   >
                     <span
                       className={cn(
-                        'inline-flex h-8 w-8 items-center justify-center rounded-full ring-1',
-                        def.chip
+                        'inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ring-1',
+                        attributeChip(def.key, variant)
                       )}
                     >
-                      <Icon className='h-5 w-5' />
+                      {variant.text ?? (
+                        <AttributeIcon
+                          attribute={def.key}
+                          chosenId={variant.id}
+                          size={variant.src ? 26 : 20}
+                        />
+                      )}
                     </span>
-                    <span className='text-[10px] leading-tight text-muted-foreground'>{label}</span>
+                    <span className='text-[10px] leading-tight text-muted-foreground'>
+                      {variant.label}
+                    </span>
                   </button>
                 ))}
               </div>

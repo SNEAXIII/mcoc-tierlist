@@ -81,11 +81,14 @@ one table.
 
 ### Icon mockup
 
-The **Icons** button opens a picker showing every candidate icon per attribute
-(Heroicons plus the hand-drawn ones Heroicons has no equivalent for, in
-`src/components/custom-icons.tsx`). The choice applies immediately and is saved
-with the board. Dropping in final artwork later means adding an entry to
-`ATTRIBUTES[key].variants`, nothing else.
+The **Icons** button opens a picker showing every candidate icon per attribute.
+Each one defaults to the in-game artwork in `src/assets/icons/` (PNGs with their
+own colours, drawn on a dark disc ringed in the attribute's colour); behind it
+sit the vector fallbacks — Heroicons plus the hand-drawn ones Heroicons has no
+equivalent for, in `src/components/custom-icons.tsx`. `6★` is the exception: it
+stays a text badge, because the star count is already carried by the portrait
+frame. The choice applies immediately and is saved with the board, and another
+asset is one more entry in `ATTRIBUTES[key].variants`, nothing else.
 
 ## Storage
 

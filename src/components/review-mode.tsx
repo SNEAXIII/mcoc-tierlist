@@ -5,12 +5,13 @@ import {
   CheckCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/solid'
+import AttributeIcon from './attribute-icon'
 import ChampionPortrait from './champion-portrait'
 import ToggleChip from './toggle-chip'
 import { CHAMPIONS_BY_ID } from '@/data/champions'
 import { attributesOf, frameFor } from '@/lib/board'
 import { readableTextColor } from '@/lib/color'
-import { ATTRIBUTE_LIST, attributeIcon } from '@/lib/icons'
+import { ATTRIBUTE_LIST } from '@/lib/icons'
 import { cn } from '@/lib/cn'
 import type { BoardActions } from '@/lib/use-board'
 import type { BoardState } from '@/lib/types'
@@ -143,20 +144,21 @@ export default function ReviewMode({
             </div>
 
             <div className='flex flex-wrap justify-center gap-1.5'>
-              {ATTRIBUTE_LIST.map((def) => {
-                const Icon = attributeIcon(def.key, board.iconChoices[def.key])
-                return (
-                  <ToggleChip
-                    key={def.key}
-                    on={!!attrs.flags[def.key]}
-                    onToggle={() => actions.toggleAttribute(champion.id, def.key)}
-                    accent={def.accent}
-                  >
-                    <Icon className='h-4 w-4' />
-                    {def.code}
-                  </ToggleChip>
-                )
-              })}
+              {ATTRIBUTE_LIST.map((def) => (
+                <ToggleChip
+                  key={def.key}
+                  on={!!attrs.flags[def.key]}
+                  onToggle={() => actions.toggleAttribute(champion.id, def.key)}
+                  accent={def.accent}
+                >
+                  <AttributeIcon
+                    attribute={def.key}
+                    chosenId={board.iconChoices[def.key]}
+                    size={16}
+                  />
+                  {def.code}
+                </ToggleChip>
+              ))}
             </div>
 
             {attrs.flags.awk && (

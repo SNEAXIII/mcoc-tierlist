@@ -1,4 +1,5 @@
-import { ATTRIBUTES, attributeIcon } from '@/lib/icons'
+import AttributeIcon from './attribute-icon'
+import { ATTRIBUTES, attributeChip, attributeVariant } from '@/lib/icons'
 import { ATTRIBUTE_KEYS, type AttributeKey, type ChampionAttributes } from '@/lib/types'
 import { cn } from '@/lib/cn'
 
@@ -27,7 +28,7 @@ export default function AttributeBadges({
     <div className={cn('flex flex-wrap items-center justify-center gap-[2px]', className)}>
       {active.map((key) => {
         const def = ATTRIBUTES[key]
-        const Icon = attributeIcon(key, iconChoices[key])
+        const variant = attributeVariant(key, iconChoices[key])
         const value = key === 'awk' && attributes.sig ? `x${attributes.sig}` : null
         return (
           <span
@@ -35,14 +36,18 @@ export default function AttributeBadges({
             title={def.code}
             className={cn(
               'inline-flex items-center justify-center gap-[1px] rounded-full px-[2px] font-bold leading-none ring-1',
-              def.chip
+              attributeChip(key, variant)
             )}
             style={{ height: size, minWidth: size, fontSize: size * 0.62 }}
           >
-            {def.textBadge ? (
-              <span className='px-[1px]'>{def.code}</span>
+            {variant.text ? (
+              <span className='px-[1px]'>{variant.text}</span>
             ) : (
-              <Icon style={{ width: size * 0.7, height: size * 0.7 }} />
+              <AttributeIcon
+                attribute={key}
+                chosenId={iconChoices[key]}
+                size={size * (variant.src ? 0.82 : 0.7)}
+              />
             )}
             {value && <span className='pr-[1px]'>{value}</span>}
           </span>
