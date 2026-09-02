@@ -25,11 +25,11 @@ import {
 } from '@/components/custom-icons'
 import artAtk from '@/assets/icons/atk-sword.png'
 import artAwk from '@/assets/icons/awk-gem.png'
-import artAw from '@/assets/icons/aw-badge.png'
+import artAw from '@/assets/icons/aw-flame.png'
 import artBg from '@/assets/icons/bg-helmet.png'
 import artDef from '@/assets/icons/def-shield.png'
 import artDual from '@/assets/icons/dual-sword-shield.png'
-import artFlame from '@/assets/icons/flame.png'
+import artRank from '@/assets/icons/rank-badge.png'
 import { ATTRIBUTE_KEYS, BADGE_KEYS, type AttributeKey, type BadgeKey } from './types'
 
 export type IconComponent = ComponentType<SVGProps<SVGSVGElement>>
@@ -138,8 +138,8 @@ export const ATTRIBUTES: { [K in BadgeKey]: AttributeDefinition<K> } = {
     artChip: 'bg-slate-950/85 text-white ring-amber-400/70',
     accent: 'data-[on=true]:bg-amber-500 data-[on=true]:text-black data-[on=true]:border-amber-400',
     variants: [
-      { id: 'art-aw', label: 'AW badge (game art)', src: artAw },
-      { id: 'art-flame', label: 'Flame (game art)', src: artFlame },
+      { id: 'art-aw', label: 'AW flame (game art)', src: artAw },
+      { id: 'art-rank', label: 'Rank badge (game art)', src: artRank },
       { id: 'crossed', label: 'Crossed swords', Icon: CrossedSwordsIcon },
       { id: 'flag', label: 'Flag (Heroicons)', Icon: FlagIcon },
       { id: 'map', label: 'Map (Heroicons)', Icon: MapIcon },
@@ -157,6 +157,7 @@ export const ATTRIBUTES: { [K in BadgeKey]: AttributeDefinition<K> } = {
       'data-[on=true]:bg-emerald-500 data-[on=true]:text-black data-[on=true]:border-emerald-400',
     variants: [
       { id: 'art-bg', label: 'BG helmet (game art)', src: artBg },
+      { id: 'art-rank', label: 'Rank badge (game art)', src: artRank },
       { id: 'trophy', label: 'Trophy (Heroicons)', Icon: TrophyIcon },
       { id: 'versus', label: 'Versus', Icon: VersusIcon },
       { id: 'flag', label: 'Flag (Heroicons)', Icon: FlagIcon },
